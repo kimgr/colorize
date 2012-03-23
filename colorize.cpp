@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <cassert>
 
 struct scoped_console_color
 {
@@ -34,13 +35,35 @@ private:
 
 bool is_all_whitespace(const std::string& line)
 {
-  // all lines in svn diffs are indented with a single leading space,
-  // so a line with only one space is really empty.
-  if (line == " ")
+  assert(!line.empty());
+
+  // All lines in an SVN diff are prefixed with a space, + or -
+  std::size_t length_without_prefix = line.length() - 1;
+
+  // Empty string has no whitespace
+  if (length_without_prefix == 0)
     return false;
 
-  size_t whitespace_count = std::count_if(line.begin(), line.end(), isspace);
-  return (line.length() == whitespace_count);
+  std::string::const_iterator begin = line.begin();
+  std::size_t whitespace_count = std::count_if(++begin, line.end(), isspace);
+
+  return (length_without_prefix == whitespace_count);
+}
+
+bool starts_with(const std::string& line, const char* prefix)
+{
+  const char* p = prefix;
+
+  for (std::string::const_iterator i = line.begin(); i != line.end(); ++i, ++p)
+  {
+    if (*p == '\0')
+      return true;
+
+    if (*p != *i)
+      return false;
+  }
+
+  return false;
 }
 
 int select_color(const std::string& line)
@@ -53,26 +76,26 @@ int select_color(const std::string& line)
     return BACKGROUND_RED;
 
   // Diff metadata
-  if (line.substr(0, 7) == "Index: ")
+  if (starts_with(line, "Index: "))
     return FOREGROUND_INTENSITY;
 
-  if (line.substr(0, 7) == "=======")
+  if (starts_with(line, "======="))
     return FOREGROUND_INTENSITY;
 
-  if (line.substr(0, 3) == "---")
+  if (starts_with(line, "---"))
     return FOREGROUND_INTENSITY;
 
-  if (line.substr(0, 3) == "+++")
+  if (starts_with(line, "+++"))
     return FOREGROUND_INTENSITY;
 
   // Change markers
-  if (line.substr(0, 2) == "@@")
+  if (starts_with(line, "@@"))
     return FOREGROUND_BLUE | FOREGROUND_GREEN;
 
-  if (line.substr(0, 1) == "-")
+  if (starts_with(line, "-"))
     return FOREGROUND_RED;
 
-  if (line.substr(0, 1) == "+")
+  if (starts_with(line, "+"))
     return FOREGROUND_GREEN;
 
   return -1;
