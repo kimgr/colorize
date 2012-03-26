@@ -7,28 +7,35 @@
 struct scoped_console_color
 {
   scoped_console_color(int color)
-    : stdout_handle(NULL)
+    : stdout_handle(GetStdHandle(STD_OUTPUT_HANDLE))
     , previous_color(-1)
   {
     if (color != -1)
     {
-      stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-
-      CONSOLE_SCREEN_BUFFER_INFO info = {0};
-      GetConsoleScreenBufferInfo(stdout_handle, &info);
-      previous_color = info.wAttributes;
-
-      SetConsoleTextAttribute(stdout_handle, color);
+      previous_color = get_console_color();
+      set_console_color(color);
     }
   }
 
   ~scoped_console_color()
   {
-    if (stdout_handle != NULL)
-      SetConsoleTextAttribute(stdout_handle, previous_color);
+    if (previous_color != -1)
+      set_console_color(previous_color);
   }
 
 private:
+  int get_console_color()
+  {
+    CONSOLE_SCREEN_BUFFER_INFO info = {0};
+    GetConsoleScreenBufferInfo(stdout_handle, &info);
+    return info.wAttributes;
+  }
+
+  void set_console_color(int color)
+  {
+    SetConsoleTextAttribute(stdout_handle, color);
+  }
+
   HANDLE stdout_handle;
   int previous_color;
 };
