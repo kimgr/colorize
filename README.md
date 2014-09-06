@@ -8,7 +8,8 @@ A naive Win32 console utility for colorizing svn diff output.
 
 Usage:
 
-    >svn diff | colorize
+    $ svn diff | colorize
+    $ colorize 123.patch
 
 Builds with Visual Studio 2010, but should port easily to other toolsets with Win32 support.
 
