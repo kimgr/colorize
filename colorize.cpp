@@ -61,18 +61,17 @@ bool is_all_whitespace(const std::string& line)
 
 bool starts_with(const std::string& line, const char* prefix)
 {
-  const char* p = prefix;
-
-  for (std::string::const_iterator i = line.begin(); i != line.end(); ++i, ++p)
+  std::string::const_iterator i = line.begin();
+  for (const char* p = prefix; *p != 0; ++p, ++i)
   {
-    if (*p == '\0')
-      return true;
+    if (i == line.end())
+      return false;
 
-    if (*p != *i)
+    if (*i != *p)
       return false;
   }
 
-  return false;
+  return true;
 }
 
 int select_color(const std::string& line)
