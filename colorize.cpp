@@ -1,8 +1,10 @@
-#include <windows.h>
-#include <iostream>
-#include <string>
 #include <algorithm>
 #include <cassert>
+#include <fstream>
+#include <iostream>
+#include <string>
+
+#include <windows.h>
 
 struct scoped_console_color
 {
@@ -108,16 +110,34 @@ int select_color(const std::string& line)
   return -1;
 }
 
-int main(int argc, char* argv[])
+void colorize(std::istream& stream)
 {
   std::string line;
-  while (std::cin)
+  while (stream)
   {
-    getline(std::cin, line);
+    getline(stream, line);
 
     scoped_console_color recolor(select_color(line));
-
     std::cout << line << std::endl;
+  }
+}
+
+int main(int argc, char* argv[])
+{
+  if (argc > 1)
+  {
+    std::ifstream f(argv[1]);
+    if (!f)
+    {
+      std::cout << "Cannot open file: '" << argv[1] << "'" << std::endl;
+      return 1;
+    }
+
+    colorize(f);
+  }
+  else
+  {
+    colorize(std::cin);
   }
 
   return 0;
