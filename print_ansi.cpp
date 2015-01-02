@@ -30,10 +30,6 @@ void print_ansi_line(const char* line, int default_console_color)
 {
   default_console_color;
   std::puts(line);
-  // std::putchar('\033');
-  // std::putchar('[');
-  // std::putchar('0');
-  // std::putchar('m');
 }
 
 #endif // _WIN32

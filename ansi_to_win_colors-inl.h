@@ -87,14 +87,18 @@ static int translate(uint64_t ansi_params, int default_console_color)
   // Foreground color
   static const uint64_t fg_mask = uint64_t(0xFF) << 30;
   uint64_t fg_color = (ansi_params & fg_mask) >> 30;
-  if (fg_color > 0)
+  if (fg_color > 0) {
     return translate_color(fg_color, intensity * FOREGROUND_INTENSITY);
+  }
   
   // Background color
   static const uint64_t bg_mask = uint64_t(0xFF) << 40;
   uint64_t bg_color = (ansi_params & bg_mask) >> 40;
-  if (bg_color > 0)
-    return translate_color(bg_color, intensity * BACKGROUND_INTENSITY);
+  if (bg_color > 0) {
+    int base_color =
+        translate_color(bg_color, intensity * BACKGROUND_INTENSITY);
+    return base_color << 4;
+  }
 
   // We haven't seen any ANSI params we recognize, so just stay at default.
   return default_console_color;
@@ -109,7 +113,9 @@ static void ansi_aware_puts(const char* line, int default_console_color)
       putchar(*p);
       continue;
     }
-    
+
+    std::fflush(stdout);
+
     // An escape sequence, decode it and apply color to console.
     std::pair<uint64_t, const char*> parsed = parse_ansi_sequence(p);
     int color = translate(parsed.first, default_console_color);
