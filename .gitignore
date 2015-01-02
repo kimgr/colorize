@@ -1,8 +1,1 @@
-Debug/
-Release/
-ipch/
-*.vcxproj.user
-*.opensdf
-*.sdf
-*.vcxproj.filters
-*.suo
+build/
