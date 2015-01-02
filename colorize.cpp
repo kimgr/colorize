@@ -4,43 +4,7 @@
 #include <iostream>
 #include <string>
 
-#include <windows.h>
-
-struct scoped_console_color
-{
-  scoped_console_color(int color)
-    : stdout_handle(GetStdHandle(STD_OUTPUT_HANDLE))
-    , previous_color(-1)
-  {
-    if (color != -1)
-    {
-      previous_color = get_console_color();
-      set_console_color(color);
-    }
-  }
-
-  ~scoped_console_color()
-  {
-    if (previous_color != -1)
-      set_console_color(previous_color);
-  }
-
-private:
-  int get_console_color()
-  {
-    CONSOLE_SCREEN_BUFFER_INFO info = {0};
-    GetConsoleScreenBufferInfo(stdout_handle, &info);
-    return info.wAttributes;
-  }
-
-  void set_console_color(int color)
-  {
-    SetConsoleTextAttribute(stdout_handle, color);
-  }
-
-  HANDLE stdout_handle;
-  int previous_color;
-};
+#include "print_ansi.h"
 
 bool is_all_whitespace(const std::string& line)
 {
@@ -74,50 +38,51 @@ bool starts_with(const std::string& line, const char* prefix)
   return true;
 }
 
-int select_color(const std::string& line)
+std::string colorize_line(const std::string& line)
 {
-  if (line.empty())
-    return -1;
+  if (!line.empty())
+  {
+    // Whitespace
+    if (is_all_whitespace(line))
+      return "\033[41m" + line;
 
-  // Whitespace
-  if (is_all_whitespace(line))
-    return BACKGROUND_RED;
+    // Diff metadata
+    if (starts_with(line, "Index: "))
+      return "\033[1;37m" + line;
 
-  // Diff metadata
-  if (starts_with(line, "Index: "))
-    return FOREGROUND_INTENSITY;
+    if (starts_with(line, "======="))
+      return "\033[1;37m" + line;
 
-  if (starts_with(line, "======="))
-    return FOREGROUND_INTENSITY;
+    if (starts_with(line, "---"))
+      return "\033[1;37m" + line;
 
-  if (starts_with(line, "---"))
-    return FOREGROUND_INTENSITY;
+    if (starts_with(line, "+++"))
+      return "\033[1;37m" + line;
 
-  if (starts_with(line, "+++"))
-    return FOREGROUND_INTENSITY;
+    // Change markers
+    if (starts_with(line, "@@"))
+      return "\033[36m" + line;
 
-  // Change markers
-  if (starts_with(line, "@@"))
-    return FOREGROUND_BLUE | FOREGROUND_GREEN;
+    if (starts_with(line, "-"))
+      return "\033[31m" + line;
 
-  if (starts_with(line, "-"))
-    return FOREGROUND_RED;
+    if (starts_with(line, "+"))
+      return "\033[32m" + line;
+  }
 
-  if (starts_with(line, "+"))
-    return FOREGROUND_GREEN;
-
-  return -1;
+  return "\033[0m" + line;
 }
 
 void colorize(std::istream& stream)
 {
-  std::string line;
+  int default_color = get_console_color();
   while (stream)
   {
+    std::string line;
     getline(stream, line);
+    line = colorize_line(line);
 
-    scoped_console_color recolor(select_color(line));
-    std::cout << line << std::endl;
+    print_ansi_line(line.c_str(), default_color);
   }
 }
 
@@ -141,4 +106,3 @@ int main(int argc, char* argv[])
 
   return 0;
 }
-
