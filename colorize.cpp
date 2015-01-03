@@ -19,7 +19,6 @@ bool is_all_whitespace(const std::string& line)
 
   std::string::const_iterator begin = line.begin();
   std::size_t whitespace_count = std::count_if(++begin, line.end(), isspace);
-
   return (length_without_prefix == whitespace_count);
 }
 
@@ -48,26 +47,26 @@ std::string colorize_line(const std::string& line)
 
     // Diff metadata
     if (starts_with(line, "Index: "))
-      return "\033[1;37m" + line;
+      return "\033[1;37m" + line + "\033[0m";
 
     if (starts_with(line, "======="))
-      return "\033[1;37m" + line;
+      return "\033[1;37m" + line + "\033[0m";
 
     if (starts_with(line, "---"))
-      return "\033[1;37m" + line;
+      return "\033[1;37m" + line + "\033[0m";
 
     if (starts_with(line, "+++"))
-      return "\033[1;37m" + line;
+      return "\033[1;37m" + line + "\033[0m";
 
     // Change markers
     if (starts_with(line, "@@"))
-      return "\033[36m" + line;
+      return "\033[36m" + line + "\033[0m";
 
     if (starts_with(line, "-"))
-      return "\033[31m" + line;
+      return "\033[31m" + line + "\033[0m";
 
     if (starts_with(line, "+"))
-      return "\033[32m" + line;
+      return "\033[32m" + line + "\033[0m";
   }
 
   return "\033[0m" + line;
