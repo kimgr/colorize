@@ -26,9 +26,8 @@ int get_console_color()
   return -1;
 }
 
-void print_ansi_line(const char* line, int default_console_color)
+void print_ansi_line(const char* line, int)
 {
-  default_console_color;
   std::puts(line);
 }
 
