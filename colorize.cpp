@@ -1,49 +1,44 @@
-#include <algorithm>
-#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <string>
 
 #include "print_ansi.h"
 
-bool is_all_whitespace(const std::string& line)
-{
-  assert(!line.empty());
-
-  // All lines in an SVN diff are prefixed with a space, + or -
-  std::size_t length_without_prefix = line.length() - 1;
-
-  // Empty string has no whitespace
-  if (length_without_prefix == 0)
-    return false;
-
-  std::string::const_iterator begin = line.begin();
-  std::size_t whitespace_count = std::count_if(++begin, line.end(), isspace);
-  return (length_without_prefix == whitespace_count);
-}
-
 bool starts_with(const std::string& line, const char* prefix)
 {
-  std::string::const_iterator i = line.begin();
-  for (const char* p = prefix; *p != 0; ++p, ++i)
-  {
-    if (i == line.end())
-      return false;
-
-    if (*i != *p)
-      return false;
-  }
-
-  return true;
+  return line.find(prefix) == 0;
 }
 
-std::string colorize_line(const std::string& line)
+std::string colorize_trailing_whitespace(std::string line, const char *color)
+{
+  // If there is only a single character it's OK if it's a space.
+  // (diffs have their first character either ' ', '-' or '+')
+  size_t last = line.length() - 1;
+  if (last == 0)
+    return line;
+
+  // Find the last non-whitespace character
+  size_t i = line.find_last_not_of("\t ");
+  if (i == std::string::npos)
+  {
+    // All whitespace (this shouldn't happen in a diff, but let's
+    // entertain the possibility)
+    line = color + line;
+  }
+  else if (i < last)
+  {
+    // Trailing whitespace.
+    line = line.substr(0, i + 1) + color + line.substr(i + 1);
+  }
+
+  return line;
+}
+
+std::string colorize_line(std::string line)
 {
   if (!line.empty())
   {
-    // Whitespace
-    if (is_all_whitespace(line))
-      return "\033[41m" + line + "\033[0m";
+    line = colorize_trailing_whitespace(line, "\033[41m");
 
     // Diff metadata
     if (starts_with(line, "Index: "))
@@ -69,7 +64,7 @@ std::string colorize_line(const std::string& line)
       return "\033[32m" + line + "\033[0m";
   }
 
-  return "\033[0m" + line;
+  return line;
 }
 
 void colorize(std::istream& stream)
