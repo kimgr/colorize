@@ -4,7 +4,7 @@
 [Kim Gräsman](http://grundlig.wordpress.com)
 [@kimgr](http://twitter.com/kimgr)
 
-A naive Win32 console utility for colorizing svn diff output.
+A naive console utility for colorizing svn diff output.
 
 Usage:
 
@@ -16,6 +16,8 @@ Building requires CMake:
     $ cd .../colorize
     $ mkdir build && cd build
     $ cmake ..
+
+Tested on Windows and FreeBSD 10.1.
 
 See also:
 
