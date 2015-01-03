@@ -44,7 +44,7 @@ std::string colorize_line(const std::string& line)
   {
     // Whitespace
     if (is_all_whitespace(line))
-      return "\033[41m" + line;
+      return "\033[41m" + line + "\033[0m";
 
     // Diff metadata
     if (starts_with(line, "Index: "))

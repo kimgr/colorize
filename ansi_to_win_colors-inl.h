@@ -116,4 +116,6 @@ static void ansi_aware_puts(const char* line, int default_console_color)
     SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), color);
     p = parsed.second;
   }
+
+  std::putchar('\n');
 }

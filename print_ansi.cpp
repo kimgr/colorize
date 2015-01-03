@@ -1,4 +1,5 @@
 #include "print_ansi.h"
+#include <cstdio>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -15,7 +16,6 @@ void print_ansi_line(const char* line, int default_console_color)
 {
   // Call our ANSI-interpreting puts reimplemenation.
   ansi_aware_puts(line, default_console_color);
-  putchar('\n');
 }
 
 #else // _WIN32
@@ -29,8 +29,11 @@ int get_console_color()
 void print_ansi_line(const char* line, int default_console_color)
 {
   default_console_color;
-  puts(line);
-  putchar('\n');
+  std::puts(line);
+  // std::putchar('\033');
+  // std::putchar('[');
+  // std::putchar('0');
+  // std::putchar('m');
 }
 
 #endif // _WIN32
