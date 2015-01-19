@@ -17,6 +17,10 @@ std::string colorize_trailing_whitespace(std::string line, const char *color)
   if (last == 0)
     return line;
 
+  // Only highlight trailing whitespace for lines we added.
+  if (line[0] != '+')
+    return line;
+  
   // Find the last non-whitespace character
   size_t i = line.find_last_not_of("\t ");
   if (i == std::string::npos)
